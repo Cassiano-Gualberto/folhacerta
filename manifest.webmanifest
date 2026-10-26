@@ -1,0 +1,27 @@
+{
+  "name": "FolhaCerta — Leitor de Ponto e Salário",
+  "short_name": "FolhaCerta",
+  "description": "Importe o PDF do espelho de ponto e estime seu salário localmente.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "background_color": "#0a1119",
+  "theme_color": "#101b25",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
