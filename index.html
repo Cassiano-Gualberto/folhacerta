@@ -61,11 +61,12 @@
           <label>Contribuição assistencial (R$)<input id="assist" value="0,00" inputmode="decimal"></label>
           <label>Seguro de vida (R$)<input id="insurance" value="0,00" inputmode="decimal"></label>
           <label>Outros descontos (R$)<input id="other" value="0,00" inputmode="decimal"></label>
-          <label class="full">Como calcular DSR<select id="dsrMode"><option value="historical">Estimativa histórica — 13,16 h</option><option value="manual">Informar horas de DSR</option></select></label>
-          <label class="full" id="dsrHoursWrap" hidden>Horas DSR em decimal (ex.: 13,16)<input id="dsrHours" inputmode="decimal" value="13,16"></label>
+          <label class="full">Cálculo de DSR<select id="dsrMode"><option value="automatic">Automático · cerca de 19,23% das verbas variáveis</option><option value="historical">Antigo · 13,16 h fixas (não recomendado)</option><option value="manual">Informar horas de DSR</option><option value="value">Informar DSR em reais (conferir holerite)</option></select></label>
+          <label class="full" id="dsrHoursWrap" hidden>Horas DSR em decimal (ex.: 11,90)<input id="dsrHours" inputmode="decimal" value="11,90"></label>
+          <label class="full" id="dsrValueWrap" hidden>DSR pago, em R$ (ex.: 172,92)<input id="dsrValue" inputmode="decimal" placeholder="172,92"></label>
           <label>INSS manual (opcional)<input id="inssOverride" placeholder="Automático: 2026" inputmode="decimal"></label>
           <label>IRRF manual (opcional)<input id="irrfOverride" placeholder="Automático: 2026" inputmode="decimal"></label>
-        </div><p class="hint">Preencha seus valores reais uma vez; eles ficam salvos apenas neste navegador. O DSR não aparece no espelho: usamos uma estimativa que você pode editar. INSS e IRRF usam parâmetros de 2026.</p></div>
+        </div><p class="hint">Preencha seus valores reais uma vez; eles ficam salvos apenas neste navegador. O DSR não aparece no espelho de ponto. A estimativa automática utiliza a proporção observada em dois contracheques (aprox. 19,23% das verbas variáveis), mas em outro mês foi 20%. É possível ajustar as horas ou o valor exato. INSS e IRRF usam parâmetros de 2026.</p></div>
       </details>
     </div>
     <section class="card" aria-label="Previsão de pagamento">
@@ -218,9 +219,22 @@ const FC = (() => {
     const h=salary/divisor,hrs={};
     for(let name of ['night','he75','he100','bank'])hrs[name]=TWO(hours(point[name]||'00:00'));
     const earn={salary:TWO(salary),night:TWO(hrs.night*h*.30),he75:TWO(hrs.he75*h*1.975),he100:TWO(hrs.he100*h*2.3),bank:TWO(hrs.bank*h*1.75)};
-    let dsrMode=settings.dsrMode||'historical';
-    let dsrHours=dsrMode==='manual'?ptNum(settings.dsrHours):13.16;
-    earn.dsr=TWO(dsrHours*h);
+    let dsrMode=settings.dsrMode||'automatic';
+    const variablePay=earn.night+earn.he75+earn.he100+earn.bank;
+    let dsrHours=null;
+    if(dsrMode==='automatic') earn.dsr=TWO(variablePay*(5/26));
+    else if(dsrMode==='historical'){dsrHours=13.16;earn.dsr=TWO(dsrHours*h);}
+    else if(dsrMode==='manual'){
+      dsrHours=ptNum(settings.dsrHours);
+      if(dsrHours<0)throw Error('Horas de DSR não podem ser negativas.');
+      earn.dsr=TWO(dsrHours*h);
+    }
+    else if(dsrMode==='value'){
+      if(!String(settings.dsrValue??'').trim())throw Error('Informe o valor de DSR em reais.');
+      earn.dsr=TWO(ptNum(settings.dsrValue));
+      if(earn.dsr<0)throw Error('Valor de DSR não pode ser negativo.');
+    }
+    else throw Error('Modo de DSR não reconhecido.');
     if(settings.dsrValueOverride!==undefined && String(settings.dsrValueOverride).trim()!=='')earn.dsr=TWO(ptNum(settings.dsrValueOverride));
     const gross=TWO(Object.values(earn).reduce((a,b)=>a+b,0));
     const inss=String(settings.inssOverride??'').trim()?TWO(ptNum(settings.inssOverride)):inss2026(gross);
@@ -228,7 +242,7 @@ const FC = (() => {
     const deductions={inss,irrf,assist,insurance,other,advance:adv};
     const net=TWO(gross-inss-irrf-assist-insurance-other);
     const final=TWO(net-adv);
-    return{hrs,earn,dsrHours,gross,net,final,deductions,h};
+    return{hrs,earn,dsrHours,dsrMode,gross,net,final,deductions,h};
   }
   return {pdfText,parseItems,calculate,money,dec,hours,inss2026,irrf2026,ptNum};
 })();
@@ -240,8 +254,15 @@ if(typeof module!=='undefined' && module.exports)module.exports=FC;
   'use strict';
   const $=id=>document.getElementById(id);let filePoint=null,last=null;
   const tfields=['night','he75','he100','bank'];
-  const prefs=['salary','divisor','advance','assist','insurance','other','dsrMode','dsrHours','inssOverride','irrfOverride'];
-  try { const saved = JSON.parse(localStorage.getItem('folhacerta-prefs-v2')||'null'); if (saved && typeof saved==='object') for (const id of prefs) if (Object.prototype.hasOwnProperty.call(saved,id) && typeof saved[id]==='string') $(id).value=saved[id]; }catch(e){}
+  const prefs=['salary','divisor','advance','assist','insurance','other','dsrMode','dsrHours','dsrValue','inssOverride','irrfOverride'];
+  const prefsKey='folhacerta-prefs-v3';
+  try {
+    const migrated=!localStorage.getItem(prefsKey);
+    const saved = JSON.parse(localStorage.getItem(prefsKey)||localStorage.getItem('folhacerta-prefs-v2')||'null');
+    if (saved && typeof saved==='object') for (const id of prefs) if (Object.prototype.hasOwnProperty.call(saved,id) && typeof saved[id]==='string') $(id).value=saved[id];
+    // The old version silently applied fixed 13.16 DSR hours: migrate to a moving estimate.
+    if(migrated && $('dsrMode').value==='historical') $('dsrMode').value='automatic';
+  }catch(e){}
   const setStatus=(message,kind='')=>{const el=$('status');el.hidden=false;el.className='status '+kind;el.textContent=message;};
   const safe=(x)=>String(x).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const money=FC.money;
@@ -284,7 +305,7 @@ if(typeof module!=='undefined' && module.exports)module.exports=FC;
         row('A80 · HE 75% + adicional noturno',`${p.he75} no espelho`,v.earn.he75),
         row('A72 · HE 100% + adicional noturno',`${p.he100} no espelho`,v.earn.he100),
         row('B04 · Horas convertidas em pagamento',`${p.bank} no espelho · HE 75%`,v.earn.bank),
-        row('DSR sobre horas extras',`${digits(v.dsrHours)} h · valor estimado`,v.earn.dsr),
+        row('DSR sobre horas extras',v.dsrMode==='automatic'?'Estimativa: 19,23% das verbas variáveis':v.dsrMode==='value'?'Valor informado manualmente':`${digits(v.dsrHours)} h · ${v.dsrMode==='historical'?'estimativa fixa':'horas informadas'}`,v.earn.dsr),
         row('TOTAL BRUTO','',v.gross,'total')].join('');
       $('dedRows').innerHTML=[
         row('INSS','Tabela progressiva de 2026 ou valor manual',v.deductions.inss,'deduct'),
@@ -294,7 +315,8 @@ if(typeof module!=='undefined' && module.exports)module.exports=FC;
         row('Outros descontos','',v.deductions.other,'deduct'),
         row('Adiantamento já recebido','Descontado uma única vez',v.deductions.advance,'deduct'),
         row('A CAIR NO FECHAMENTO','',v.final,'total')].join('');
-      const notes=[...p.warnings, 'DSR calculado pelo histórico de 13,16 horas, salvo ajuste manual. Pode não coincidir com o DSR da folha.'];
+      const dsrNote=v.dsrMode==='automatic'?'DSR automático estimado a 19,23% das verbas variáveis (outro contracheque mostrou 20%). O valor oficial não está no espelho de ponto.':v.dsrMode==='historical'?'DSR fixo de 13,16 horas era a regra anterior da calculadora e pode superestimar meses como setembro.':v.dsrMode==='manual'?'DSR calculado com as horas informadas; o RH pode arredondar de maneira diferente.':'DSR em reais informado manualmente conforme contracheque.';
+      const notes=[...p.warnings, dsrNote, 'O espelho exibe minutos, mas a folha pode considerar frações de segundos: pequenas diferenças de centavos podem permanecer.'];
       $('warningBox').innerHTML=notes.map(x=>`<p>• ${safe(x)}</p>`).join('');$('warningBox').hidden=false;
     }catch(e){setStatus(e.message,'error');}
   }
@@ -308,9 +330,10 @@ if(typeof module!=='undefined' && module.exports)module.exports=FC;
   for(const name of ['dragenter','dragover'])$('dropzone').addEventListener(name,e=>{e.preventDefault();$('dropzone').classList.add('drag')});
   for(const name of ['dragleave','drop'])$('dropzone').addEventListener(name,e=>{e.preventDefault();$('dropzone').classList.remove('drag')});
   $('dropzone').addEventListener('drop',e=>loadFile(e.dataTransfer.files[0]));
-  for(const k of [...prefs,...tfields])$(k).addEventListener('input',()=>{if(prefs.includes(k))try{localStorage.setItem('folhacerta-prefs-v2',JSON.stringify(Object.fromEntries(prefs.map(id=>[id,$(id).value]))));}catch(e){};recalc();});
-  $('dsrMode').addEventListener('change',()=>{$('dsrHoursWrap').hidden=$('dsrMode').value!=='manual';try{localStorage.setItem('folhacerta-prefs-v2',JSON.stringify(Object.fromEntries(prefs.map(id=>[id,$(id).value]))));}catch(e){};recalc();});
-  $('dsrHoursWrap').hidden=$('dsrMode').value!=='manual';
+  for(const k of [...prefs,...tfields])$(k).addEventListener('input',()=>{if(prefs.includes(k))try{localStorage.setItem(prefsKey,JSON.stringify(Object.fromEntries(prefs.map(id=>[id,$(id).value]))));}catch(e){};recalc();});
+  function syncDSRControls(){ $('dsrHoursWrap').hidden=$('dsrMode').value!=='manual';$('dsrValueWrap').hidden=$('dsrMode').value!=='value'; }
+  $('dsrMode').addEventListener('change',()=>{syncDSRControls();try{localStorage.setItem(prefsKey,JSON.stringify(Object.fromEntries(prefs.map(id=>[id,$(id).value]))));}catch(e){};recalc();});
+  syncDSRControls();
   $('printBtn').addEventListener('click',()=>window.print());
   $('copyBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(summary());setStatus('Resumo copiado.','ok')}catch{const ta=document.createElement('textarea');ta.value=summary();document.body.append(ta);ta.select();document.execCommand('copy');ta.remove();setStatus('Resumo copiado.','ok')}});
   $('csvBtn').addEventListener('click',()=>{if(!last)return;const {point:p,result:v}=last;const rows=[['Campo','Valor'],['Início',p.periodStart],['Fim',p.periodEnd],['A12 horas',p.night],['A80 horas',p.he75],['A72 horas',p.he100],['B04 horas',p.bank],['Salário',v.earn.salary],['Adicional noturno',v.earn.night],['HE75',v.earn.he75],['HE100',v.earn.he100],['Horas convertidas',v.earn.bank],['DSR estimado',v.earn.dsr],['Total bruto',v.gross],['INSS',v.deductions.inss],['IRRF',v.deductions.irrf],['Contribuição',v.deductions.assist],['Seguro',v.deductions.insurance],['Outros',v.deductions.other],['Líquido mensal',v.net],['Adiantamento',v.deductions.advance],['A receber',v.final]];
