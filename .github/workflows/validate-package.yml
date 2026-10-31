@@ -40,7 +40,10 @@ jobs:
           path: ~/.android/debug.keystore
           key: folhacerta-test-signing-v1
       - name: Prepare official Android SDK tools
-        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0' >/dev/null
+        run: |
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-35' 'build-tools;35.0.0' >/dev/null
       - name: Compile, sign and validate APK
         run: bash scripts/build-android.sh
       - uses: actions/upload-artifact@v4
