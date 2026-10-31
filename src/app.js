@@ -199,7 +199,7 @@ async function setupOffline() {
     const registration=await navigator.serviceWorker.register('./sw.js');
     const showUpdate=()=>{if(registration.waiting){$('updateBanner').hidden=false;$('updateBtn').onclick=()=>registration.waiting.postMessage({type:'ACTIVATE'});}};
     showUpdate();registration.addEventListener('updatefound',()=>{const worker=registration.installing;worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)showUpdate();});});
-    let reloading=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(navigator.serviceWorker.controller&&registration.active&&!reloading){reloading=true;location.reload();}});
+    const wasControlled=Boolean(navigator.serviceWorker.controller);let reloading=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(wasControlled&&navigator.serviceWorker.controller&&registration.active&&!reloading){reloading=true;location.reload();}});
     await navigator.serviceWorker.ready;$('connection').textContent=navigator.onLine?'Pronto para usar offline':'Offline · dados locais';
   }catch{ $('connection').textContent='Offline ainda indisponível'; }
 }
