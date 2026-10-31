@@ -88,7 +88,13 @@ jobs:
           export ANDROID_HOME=/usr/local/lib/android/sdk
           echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'emulator' 'platforms;android-35' 'build-tools;35.0.0' 'system-images;android-35;google_apis;x86_64' >/dev/null
-          echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd --name FolhaCerta --package 'system-images;android-35;google_apis;x86_64' --device pixel_6
+          export ANDROID_AVD_HOME="$RUNNER_TEMP/folhacerta-avd"
+          mkdir -p "$ANDROID_AVD_HOME"
+          echo "ANDROID_AVD_HOME=$ANDROID_AVD_HOME" >> "$GITHUB_ENV"
+          echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd --name FolhaCerta --path "$ANDROID_AVD_HOME/FolhaCerta.avd" --package 'system-images;android-35;google_apis;x86_64' --device pixel_6
+          test -f "$ANDROID_AVD_HOME/FolhaCerta.avd/config.ini"
+          printf 'avd.ini.encoding=UTF-8\npath=%s/FolhaCerta.avd\ntarget=android-35\n' "$ANDROID_AVD_HOME" > "$ANDROID_AVD_HOME/FolhaCerta.ini"
+          "$ANDROID_HOME/emulator/emulator" -list-avds
           sudo chmod a+rw /dev/kvm
           nohup "$ANDROID_HOME/emulator/emulator" -avd FolhaCerta -no-window -gpu swiftshader -feature -Vulkan -memory 2048 -cores 2 -no-audio -no-boot-anim -no-snapshot </dev/null > /tmp/folhacerta-emulator.log 2>&1 &
       - name: Test native APK, local PDF and persistence
