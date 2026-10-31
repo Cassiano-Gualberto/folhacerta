@@ -9,3 +9,4 @@ private*/
 android/build/
 .openai/
 *.log
+android-test/build/

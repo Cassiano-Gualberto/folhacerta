@@ -22,7 +22,7 @@ jobs:
           path: dist/
   android:
     needs: web
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
@@ -65,3 +65,39 @@ jobs:
           O site e o APK possuem históricos separados. Transfira usando Exportar backup / Restaurar backup. Validação de assinatura não equivale a teste em aparelho físico.
           NOTES
           gh release create "v1.0.0-build-${{ github.run_number }}" --target "$GITHUB_SHA" --title 'FolhaCerta 1.0.0 — APK de testes' --prerelease --notes-file /tmp/release-notes.md android/build/FolhaCerta-1.0.0.apk android/build/verification.txt android/build/SHA256SUMS.txt
+  android-smoke:
+    needs: android
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/download-artifact@v4
+        with:
+          name: FolhaCerta-Android
+          path: android/build
+      - uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: folhacerta-test-signing-v1
+      - name: Prepare Android 15 emulator
+        run: |
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'emulator' 'platforms;android-35' 'build-tools;35.0.0' 'system-images;android-35;google_apis;x86_64' >/dev/null
+          echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd --name FolhaCerta --package 'system-images;android-35;google_apis;x86_64' --device pixel_6
+          sudo chmod a+rw /dev/kvm
+          "$ANDROID_HOME/emulator/emulator" -avd FolhaCerta -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -no-snapshot > /tmp/folhacerta-emulator.log 2>&1 &
+      - name: Test native APK, local PDF and persistence
+        run: bash scripts/test-android.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: FolhaCerta-Android-smoke
+          path: |
+            android-test/build/result.txt
+            android-test/build/android.png
+            /tmp/folhacerta-emulator.log

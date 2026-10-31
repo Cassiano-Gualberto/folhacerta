@@ -28,7 +28,9 @@ export function validateLedger(value) {
         const json = JSON.stringify(obj);
         if (json.length > 30000 || !Number.isFinite(obj.gross) || !Number.isFinite(obj.final) || !Number.isFinite(obj.net)) throw Error('Valores inválidos no backup.');
         for (const group of ['earn','deductions']) if (obj[group] && Object.values(obj[group]).some(v=>!Number.isFinite(v))) throw Error('Valores inválidos no backup.');
+        if (k === 'forecast' && (!obj.earn || !obj.deductions || !['salary','night','he75','he100','bank','extra','dsr'].every(key=>Number.isFinite(obj.earn[key])) || !['inss','irrf','assist','insurance','other','advance'].every(key=>Number.isFinite(obj.deductions[key])))) throw Error('Previsão incompleta no backup.');
         rec[k] = JSON.parse(json);
+        rec[k].warnings = Array.isArray(obj.warnings) ? obj.warnings.filter(x=>typeof x==='string').slice(0,20).map(x=>x.slice(0,500)) : [];
       }
     }
     records[month] = rec;

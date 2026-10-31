@@ -42,7 +42,7 @@ function loadMonth(month) {
   render();
 }
 function route() {
-  let name=location.hash.slice(1);
+  let name=location.hash.replace(/^#\/?/,'');
   if (!pages[name]) name='overview';
   document.querySelectorAll('.page').forEach(el=>el.hidden=el.id!==name);
   document.querySelectorAll('[data-page]').forEach(el=>{ el.classList.toggle('active',el.dataset.page===name); if(el.dataset.page===name)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current'); });
@@ -101,13 +101,13 @@ function renderHistory() {
   chart.innerHTML=recent.map(r=>{const label=monthLabel(r.month);return `<div class="chart-column"><div class="chart-bars">${r.forecast?`<div class="chart-bar" role="img" aria-label="${escape(label)} previsto ${money(r.forecast.final)}" title="Previsto: ${money(r.forecast.final)}" style="height:${Math.max(2,r.forecast.final/max*100)}%"></div>`:''}${r.actual?`<div class="chart-bar real" role="img" aria-label="${escape(label)} real ${money(r.actual.final)}" title="Real: ${money(r.actual.final)}" style="height:${Math.max(2,r.actual.final/max*100)}%"></div>`:''}</div><span class="chart-label">${escape(label.split(' de ')[0].slice(0,3))}/${r.month.slice(2,4)}</span></div>`;}).join('');
   $('chartLegend').textContent='Verde: previsão salva · azul: pagamento real · valores completos no histórico.';
 }
-$('historyList').addEventListener('click',e=>{const button=e.target.closest('[data-open-month]');if(button){loadMonth(button.dataset.openMonth);location.hash='overview';}});
+$('historyList').addEventListener('click',e=>{const button=e.target.closest('[data-open-month]');if(button){loadMonth(button.dataset.openMonth);location.hash='/overview';}});
 $('month').addEventListener('change',()=>loadMonth($('month').value));
 $('payMonth').addEventListener('change',()=>{if(!validMonth($('payMonth').value)){status('Selecione uma competência válida de pagamento.','error');return;}record.payMonth=$('payMonth').value;persist();render();});
 document.querySelectorAll('[data-setting],[data-point]').forEach(el=>el.addEventListener('input',()=>{const group=el.dataset.setting?'settings':'point', key=el.dataset.setting||el.dataset.point;record[group][key]=el.value;persist();render();}));
 $('notes').addEventListener('input',()=>{record.notes=$('notes').value.slice(0,2000);persist();});
-$('manualBtn').addEventListener('click',()=>{location.hash='calculate';$('night').focus();status('Edite as horas e os ajustes. Nenhum PDF é necessário.');});
-$('newMonthBtn').addEventListener('click',()=>{loadMonth(nextMonth(currentMonth));location.hash='settings';status('Nova competência aberta. Ajustes recorrentes copiados; INSS, IRRF e DSR manuais foram limpos.');});
+$('manualBtn').addEventListener('click',()=>{location.hash='/calculate';$('night').focus();status('Edite as horas e os ajustes. Nenhum PDF é necessário.');});
+$('newMonthBtn').addEventListener('click',()=>{loadMonth(nextMonth(currentMonth));location.hash='/settings';status('Nova competência aberta. Ajustes recorrentes copiados; INSS, IRRF e DSR manuais foram limpos.');});
 $('saveForecast').addEventListener('click',()=>{if(!last)return;record.forecast={...structuredClone(last),divisor:record.settings.divisor,payMonth:record.payMonth,savedAt:new Date().toISOString()};const saved=persist();render();status(saved?'Previsão salva. A comparação usará estes valores até você salvar novamente.':'Previsão fixada nesta sessão. Exporte o backup para guardá-la.',saved?'':'warning');});
 
 function choosePdf(kind) { if(busy)return;importKind=kind;$('pdfInput').value='';$('pdfInput').click(); }
@@ -129,7 +129,7 @@ async function importPdf(file,kind) {
       const point=parsePoint(lines);
       if(!validMonth(point.month))throw Error('Competência do espelho inválida.');
       const dest=getRecord(point.month);dest.point=point;dest.settings.nightBasis='reduced';
-      loadMonth(point.month);const saved=persist();location.hash='calculate';
+      loadMonth(point.month);const saved=persist();location.hash='/calculate';
       status('Ponto importado. Revise horas e salário antes de salvar a previsão.'+(saved?'':' Exporte um backup para guardar a sessão.'),point.warnings.length?'warning':'');
     } else {
       pendingPayslip=parsePayslip(lines);
@@ -151,19 +151,20 @@ $('confirmPayslip').addEventListener('click',()=>{
   dest.actual=a;
   if(a.payMonth)dest.payMonth=a.payMonth;
   let seeded=false;
-  if(!number(dest.settings.salary)) {
+  let salaryValid=false;try{salaryValid=number(dest.settings.salary)>0;}catch{}
+  if(!salaryValid) {
     dest.settings.salary=decimal(a.earn.salary);seeded=true;
     if(a.suggestedDivisor&&[200,220].includes(a.suggestedDivisor))dest.settings.divisor=String(a.suggestedDivisor);
     for(const k of ['advance','assist','insurance','other']) if(Number.isFinite(a.deductions[k]))dest.settings[k]=decimal(a.deductions[k]);
   }
-  pendingPayslip=null;$('payslipDialog').close();loadMonth(month);persist();location.hash='overview';
+  pendingPayslip=null;$('payslipDialog').close();loadMonth(month);persist();location.hash='/overview';
   status('Contracheque vinculado. '+(seeded?'Salário e descontos foram preenchidos pelo recibo. A previsão atual usa essas informações, não uma previsão anterior. ':'A previsão salva foi preservada. ')+(a.warnings||[]).join(' '),a.warnings.length?'warning':'');
 });
 $('cancelPayslip').addEventListener('click',()=>{pendingPayslip=null;$('payslipDialog').close();});
 $('actualForm').addEventListener('submit',e=>{e.preventDefault();try{
   const a={source:'manual',gross:number($('actualGross').value),net:number($('actualNet').value),final:number($('actualFinal').value),warnings:[]};
   if(a.gross<0||a.net<0||a.final<0||a.gross<a.net||a.net<a.final)throw Error('Confira os valores: bruto ≥ líquido mensal ≥ pagamento final, todos não negativos.');
-  record.actual=a;persist();render();location.hash='overview';status('Valores reais registrados para comparação.');
+  record.actual=a;persist();render();location.hash='/overview';status('Valores reais registrados para comparação.');
 }catch(err){status(err.message,'error');}});
 function download(content,type,name) {
   if(window.FolhaCertaAndroid?.saveFile) {
