@@ -90,7 +90,7 @@ jobs:
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'emulator' 'platforms;android-35' 'build-tools;35.0.0' 'system-images;android-35;google_apis;x86_64' >/dev/null
           echo no | "$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager" create avd --name FolhaCerta --package 'system-images;android-35;google_apis;x86_64' --device pixel_6
           sudo chmod a+rw /dev/kvm
-          "$ANDROID_HOME/emulator/emulator" -avd FolhaCerta -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -no-snapshot > /tmp/folhacerta-emulator.log 2>&1 &
+          nohup "$ANDROID_HOME/emulator/emulator" -avd FolhaCerta -no-window -gpu swiftshader -feature -Vulkan -memory 2048 -cores 2 -no-audio -no-boot-anim -no-snapshot </dev/null > /tmp/folhacerta-emulator.log 2>&1 &
       - name: Test native APK, local PDF and persistence
         run: bash scripts/test-android.sh
       - uses: actions/upload-artifact@v4
