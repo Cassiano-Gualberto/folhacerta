@@ -12,11 +12,12 @@ find "$BUILD/classes" -name '*.class' -print0 | xargs -0 "$TOOLS/d8" --lib "$PLA
 "$TOOLS/zipalign" -p -f 4 "$BUILD/unsigned.apk" "$BUILD/aligned.apk"
 "$TOOLS/apksigner" sign --ks "$HOME/.android/debug.keystore" --ks-key-alias androiddebugkey --ks-pass pass:android --key-pass pass:android --out "$BUILD/smoke.apk" "$BUILD/aligned.apk"
 ADB="$SDK/platform-tools/adb"
+trap '"$ADB" exec-out screencap -p > "$BUILD/android.png" 2>/dev/null || true; "$ADB" logcat -d -t 600 > "$BUILD/logcat.txt" 2>/dev/null || true' EXIT
 timeout 150 "$ADB" wait-for-device || { cat /tmp/folhacerta-emulator.log; exit 1; }
 timeout 240 bash -c 'until [[ "$("$1" shell getprop sys.boot_completed 2>/dev/null | tr -d "\r")" == 1 ]]; do sleep 2; done' _ "$ADB" || { cat /tmp/folhacerta-emulator.log; exit 1; }
 "$ADB" shell input keyevent 82
 "$ADB" install android/build/FolhaCerta-1.0.0.apk
 "$ADB" install "$BUILD/smoke.apk"
 timeout 180 "$ADB" shell am instrument -w -r com.folhacerta.smoke/com.folhacerta.smoke.SmokeInstrumentation | tee "$BUILD/result.txt"
-rg 'PASS FolhaCerta' "$BUILD/result.txt"
+if command -v rg >/dev/null; then rg 'PASS FolhaCerta' "$BUILD/result.txt"; else grep -F 'PASS FolhaCerta' "$BUILD/result.txt"; fi
 "$ADB" exec-out screencap -p > "$BUILD/android.png"

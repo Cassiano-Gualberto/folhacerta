@@ -106,4 +106,5 @@ jobs:
           path: |
             android-test/build/result.txt
             android-test/build/android.png
+            android-test/build/logcat.txt
             /tmp/folhacerta-emulator.log
