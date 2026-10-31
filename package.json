@@ -1,0 +1,13 @@
+{
+  "name": "folhacerta",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": { "pdfjs-dist": "6.4.299" },
+  "engines": { "node": ">=22" }
+}

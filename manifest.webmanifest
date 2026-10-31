@@ -1,21 +1,11 @@
 {
-  "name": "FolhaCerta — Leitor de Ponto e Salário",
-  "short_name": "FolhaCerta",
-  "description": "Importe o PDF do espelho de ponto e estime seu salário localmente.",
-  "lang": "pt-BR",
-  "start_url": "./",
-  "scope": "./",
-  "id": "./",
-  "display": "standalone",
-  "background_color": "#0a1119",
-  "theme_color": "#101b25",
-  "orientation": "portrait-primary",
-  "icons": [
-    {
-      "src": "./icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
-  ]
+ "name":"FolhaCerta — seu ponto, seu salário","short_name":"FolhaCerta",
+ "description":"Leitura local de ponto e contracheque, previsão salarial e histórico mensal.",
+ "lang":"pt-BR","start_url":"./","scope":"./","id":"./","display":"standalone",
+ "background_color":"#0b131a","theme_color":"#0b151b",
+ "icons":[
+  {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+  {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+  {"src":"./icons/icon-maskable.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+ ]
 }

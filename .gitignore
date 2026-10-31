@@ -1,0 +1,11 @@
+node_modules/
+dist/
+private*/
+*.pdf
+*.jks
+*.keystore
+*.apk
+*.aab
+android/build/
+.openai/
+*.log

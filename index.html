@@ -1,361 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#101b25">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" type="image/svg+xml" href="./icon.svg">
-<meta name="description" content="Aplicativo que lê seu espelho de ponto em PDF e estima o pagamento. Arquivo processado localmente.">
-<title>FolhaCerta — seu ponto, seu salário</title>
-<style>
-:root{color-scheme:dark;--bg:#0a1119;--surface:#14212d;--surface2:#1b2b38;--line:#2a3d4a;--txt:#edf5f5;--muted:#95aaba;--mint:#69e3b9;--teal:#153a36;--amber:#f2c880;--red:#f0a0a0}
-*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 85% -15%,#17453f 0%,transparent 40%),var(--bg);color:var(--txt);font:14px/1.55 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible,.dropzone:focus-visible{outline:2px solid var(--mint);outline-offset:3px}.shell{max-width:1180px;margin:0 auto;padding:28px 20px 70px}.header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:36px}.brand{display:flex;align-items:center;gap:11px;font-weight:820;font-size:17px;letter-spacing:-.045em}.brandmark{width:38px;height:38px;display:grid;place-items:center;background:linear-gradient(145deg,#72efbd,#0b978a);border-radius:12px;font-size:21px;color:#042820}.tag{display:inline-flex;align-items:center;gap:6px;border:1px solid #2b6553;border-radius:99px;padding:7px 11px;background:#102b29;color:#b6f9df;font-size:12px}.hero{display:flex;gap:22px;align-items:flex-end;justify-content:space-between;margin-bottom:24px}.eyebrow{font-size:11px;color:var(--mint);text-transform:uppercase;letter-spacing:.16em;font-weight:800}.hero h1{font-size:clamp(29px,4vw,50px);letter-spacing:-.06em;line-height:1.07;margin:9px 0 13px}.hero p{margin:0;color:var(--muted);max-width:650px;font-size:15px}.hero-deco{display:flex;gap:5px;align-items:end;opacity:.7}.hero-deco span{display:block;width:16px;border-radius:7px;background:#2e8375}.hero-deco span:nth-child(1){height:30px}.hero-deco span:nth-child(2){height:55px}.hero-deco span:nth-child(3){height:42px}.hero-deco span:nth-child(4){height:72px;background:var(--mint)}
-.grid{display:grid;grid-template-columns:minmax(340px,.95fr) minmax(370px,1.05fr);gap:18px;align-items:start}.card{border:1px solid var(--line);background:linear-gradient(150deg,#152533,#111e29);border-radius:17px;overflow:hidden;box-shadow:0 15px 45px #00000020}.card-pad{padding:23px}.card-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 15px}.card-title{font-size:17px;margin:0;letter-spacing:-.025em}.num{background:#285046;color:#9df5d3;border-radius:8px;padding:5px 9px;font-size:11px;font-weight:900;margin-right:8px}.caption{font-size:12px;color:var(--muted)}.dropzone{cursor:pointer;border:1.5px dashed #3e726b;border-radius:13px;background:linear-gradient(145deg,#102b2b,#132730);padding:28px 18px;text-align:center;transition:background .2s,border .2s}.dropzone.drag{background:#174b43;border-color:var(--mint)}.drop-icon{font-size:34px;color:var(--mint);margin-bottom:8px}.dropzone strong{display:block;font-size:17px;margin-bottom:3px}.dropzone .caption{display:block;margin-bottom:13px}.button{border:1px solid #47615e;background:#213740;color:var(--txt);font-weight:700;padding:10px 14px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:8px}.button:hover:not(:disabled){background:#28454a}.button.primary{background:var(--mint);color:#092e28;border-color:var(--mint)}.button.primary:hover{background:#bafbe3}.actions{display:flex;flex-wrap:wrap;gap:8px}.actions .button{flex:1}.small{font-size:12px}.status{margin-top:14px;font-size:13px;border-radius:11px;padding:10px 12px;background:#10252c;border:1px solid #31515b;color:#bddee4}.status.error{border-color:#844d4d;background:#321d22;color:#ffb9b9}.status.ok{border-color:#2f7059;background:#10342b;color:#a9f2d2}.status[hidden],#results[hidden],#beforeUpload[hidden],#warningBox[hidden]{display:none}.extracted{margin-top:17px;display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.extracted>div{background:#0d1c26;border:1px solid #29414b;padding:11px;border-radius:11px}.extracted .value{display:block;margin-top:5px;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}.table{width:100%;border-collapse:collapse}.table td{padding:10px 0;border-bottom:1px solid #253d49;vertical-align:top}.table tr:last-child td{border-bottom:0}.table td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:740;white-space:nowrap}.table .sub{color:var(--muted);display:block;font-size:11px}.table tr.total td{border-top:1px solid #4b685e;padding-top:15px;color:#a7f2d3;font-weight:850}.table tr.deduct td:last-child{color:#ffbeb4}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.form-grid label{display:block;font-size:12px;color:#d3e0e5;font-weight:700}.form-grid input,.form-grid select{margin-top:6px;display:block;width:100%;background:#0a1822;color:#fff;border:1px solid #35505e;padding:10px 11px;border-radius:9px}.form-grid .full{grid-column:1/-1}.hint{color:var(--muted);font-size:11px;margin-top:5px}.section{border-top:1px solid var(--line);padding:21px 23px}.section h3{font-size:14px;margin:0 0 12px}.advanced{border-top:1px solid var(--line);padding:0 23px}details summary{cursor:pointer;font-weight:740;color:#a4dfcd;padding:18px 0}details .inner{padding:0 0 20px}.result-hero{background:radial-gradient(circle at 80% -40%,#185245 0,transparent 60%),#14312d;padding:28px 25px 24px;border-bottom:1px solid #286552}.result-hero .result-label{color:#a4dfc9;letter-spacing:.1em;text-transform:uppercase;font-size:11px;font-weight:850}.result-hero .big{font-weight:900;letter-spacing:-.06em;font-size:clamp(34px,4vw,51px);color:#a0f4d2;font-variant-numeric:tabular-nums;line-height:1.13;margin:9px 0}.chips{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.chip{border:1px solid #346658;background:#102b2c;border-radius:11px;padding:12px}.chip span{display:block;color:#9dc3b8;font-size:11px}.chip strong{font-size:21px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.warning{color:#e5d4b0;border:1px solid #5d5439;background:#26281f;border-radius:10px;padding:12px 13px;margin:16px 0 0;font-size:12px}.warning p{margin:0 0 8px}.warning p:last-child{margin-bottom:0}.privacy{display:flex;align-items:flex-start;gap:10px;margin-top:13px;color:var(--muted);font-size:12px}.privacy .dot{color:var(--mint);font-weight:900}.before{text-align:center;padding:70px 28px;color:var(--muted)}.before .icon{font-size:42px;color:#578a7c}.before strong{display:block;color:#dfedeb;font-size:18px;margin:15px 0 7px}.foot{margin-top:24px;color:#8197a5;font-size:12px;display:flex;justify-content:space-between;gap:15px}.foot b{color:#a3caba}.badge{border-radius:99px;padding:4px 8px;font-size:10px;font-weight:800;background:#235248;color:#b6fce0}.badge.warn{background:#564224;color:#ffe0ad}.inline-sep{border-top:1px solid var(--line);margin:18px 0}.file-note{color:#9eb8c4;overflow-wrap:anywhere;margin-top:10px;font-size:12px}.notfound{font-size:12px;color:#e9c38d}.unseen{display:none}.
-@media(max-width:850px){.grid{grid-template-columns:1fr}.hero-deco{display:none}}@media(max-width:540px){.shell{padding:19px 12px 45px}.hero h1{font-size:33px}.header{margin-bottom:22px}.card-pad{padding:18px}.section{padding:17px}.advanced{padding:0 17px}.result-hero{padding:23px 19px}.form-grid{gap:9px}.extracted{gap:5px}.extracted>div{padding:9px 7px}.extracted .value{font-size:14px}.tag{font-size:10px}.brand{font-size:16px}.foot{display:block}}
-@media print{body{color:#111;background:#fff}.shell{max-width:none;padding:0}.header,.hero,.dropzone,.privacy,.advanced,.actions,.foot,.hide-print{display:none!important}.grid{display:block}.card{break-inside:avoid;border:1px solid #ccc;box-shadow:none;margin-bottom:16px;background:#fff}.card-pad,.section,.result-hero{background:#fff;color:#000}.result-hero .big{color:#176349}.table td{color:#000}.table tr.total td{color:#176349}.status,.warning{color:#555;border-color:#ddd;background:#fff}.chip{border:1px solid #ccc;background:#fff}.chip span,.chip strong{color:#333}#beforeUpload{display:none!important}}
-
-.install-button {white-space:nowrap;padding:8px 12px;font-size:12px;border-color:#2e8a75;color:#baf7da;background:#15392f}
-@media(max-width:540px){.header{align-items:flex-start;gap:7px}.header .tag{padding:5px 8px;font-size:9px}.brandmark{width:34px;height:34px}.install-button{padding:6px 8px;font-size:11px}}
-</style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b151b"><meta name="color-scheme" content="dark">
+<meta name="description" content="Seu ponto, seu salário. Importe PDFs no dispositivo, acompanhe previsões e confira seu contracheque.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; worker-src 'self' blob:; connect-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<title>FolhaCerta — seu ponto, seu salário</title><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="./icons/icon-192.png"><link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./styles.css"><script src="./src/app.js" type="module"></script>
 </head>
 <body>
-<main class="shell">
-  <header class="header"><div class="brand"><div class="brandmark">≋</div><span>Folha<span style="color:var(--mint)">Certa</span></span></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end"><button type="button" class="button install-button" id="installBtn" hidden>＋ Instalar no celular</button><div class="tag">● PDF processado no dispositivo</div></div></header>
-  <div class="hero"><div><div class="eyebrow">Leitor automático de espelho de ponto</div><h1>Do PDF para o<br>seu salário.</h1><p>Envie seu espelho de ponto em PDF. O FolhaCerta identifica as horas e calcula quanto deve cair na sua conta, já descontando o adiantamento.</p></div><div class="hero-deco" aria-hidden="true"><span></span><span></span><span></span><span></span></div></div>
-  <div class="grid">
-    <div class="card">
-      <div class="card-pad">
-        <div class="card-top"><h2 class="card-title"><span class="num">1</span>Envie seu ponto</h2><span class="caption">Somente PDF original</span></div>
-        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Escolher PDF do espelho de ponto">
-          <div class="drop-icon" aria-hidden="true">▤</div><strong>Selecione seu espelho de ponto</strong><span class="caption">PDF de texto original da Dexian. Seu arquivo não é enviado para nenhum servidor.</span>
-          <button type="button" class="button primary" id="pickBtn">Selecionar PDF</button>
-          <input id="pdfInput" type="file" accept="application/pdf,.pdf" hidden>
-        </div>
-        <div class="privacy"><span class="dot">✓</span><span>Leitura local, sem servidor e sem cadastro. O arquivo não é armazenado.</span></div>
-        <div class="status" id="status" role="status" hidden></div>
-        <div class="file-note" id="filename" hidden></div>
-      </div>
-      <div id="pointSection" class="section" hidden>
-        <div class="card-top"><h2 class="card-title"><span class="num">2</span>Horas identificadas</h2><span class="badge" id="readBadge">Lido</span></div>
-        <div class="caption" id="period"></div>
-        <div class="extracted">
-          <div><span class="caption">Dias trabalhados</span><span class="value" id="days">—</span></div>
-          <div><span class="caption">Horas trabalhadas</span><span class="value" id="worked">—</span></div>
-          <div><span class="caption">Noturna reduzida</span><span class="value" id="reduced">—</span></div>
-        </div>
-        <p class="caption" style="margin:17px 0 8px">Revise os totais reconhecidos. Você pode corrigi-los antes de calcular.</p>
-        <div class="form-grid">
-          <label>Adicional noturno · A12<input id="night" inputmode="text" placeholder="93:32" aria-label="Horas adicional noturno A12"></label>
-          <label>HE 75% + noturno · A80<input id="he75" inputmode="text" placeholder="10:01" aria-label="Horas A80"></label>
-          <label>HE 100% + noturno · A72<input id="he100" inputmode="text" placeholder="02:06" aria-label="Horas A72"></label>
-          <label>Horas pagas do banco · B04<input id="bank" inputmode="text" placeholder="05:16" aria-label="Horas B04"></label>
-        </div>
-        <div class="hint" style="margin-top:12px">Formato: HH:MM (ex.: 05:34). A12 já inclui a redução da hora noturna. B04 é pago como hora extra, não compensado em folga.</div>
-      </div>
-      <details class="advanced" open>
-        <summary>Salário, adiantamento e descontos</summary>
-        <div class="inner"><div class="form-grid">
-          <label>Salário-base (R$)<input id="salary" value="3.000,00" inputmode="decimal"></label>
-          <label>Divisor mensal (h)<input id="divisor" value="200" inputmode="decimal"></label>
-          <label>Adiantamento recebido (R$)<input id="advance" value="0,00" inputmode="decimal"></label>
-          <label>Contribuição assistencial (R$)<input id="assist" value="0,00" inputmode="decimal"></label>
-          <label>Seguro de vida (R$)<input id="insurance" value="0,00" inputmode="decimal"></label>
-          <label>Outros descontos (R$)<input id="other" value="0,00" inputmode="decimal"></label>
-          <label class="full">Cálculo de DSR<select id="dsrMode"><option value="automatic">Automático · cerca de 19,23% das verbas variáveis</option><option value="historical">Antigo · 13,16 h fixas (não recomendado)</option><option value="manual">Informar horas de DSR</option><option value="value">Informar DSR em reais (conferir holerite)</option></select></label>
-          <label class="full" id="dsrHoursWrap" hidden>Horas DSR em decimal (ex.: 11,90)<input id="dsrHours" inputmode="decimal" value="11,90"></label>
-          <label class="full" id="dsrValueWrap" hidden>DSR pago, em R$ (ex.: 172,92)<input id="dsrValue" inputmode="decimal" placeholder="172,92"></label>
-          <label>INSS manual (opcional)<input id="inssOverride" placeholder="Automático: 2026" inputmode="decimal"></label>
-          <label>IRRF manual (opcional)<input id="irrfOverride" placeholder="Automático: 2026" inputmode="decimal"></label>
-        </div><p class="hint">Preencha seus valores reais uma vez; eles ficam salvos apenas neste navegador. O DSR não aparece no espelho de ponto. A estimativa automática utiliza a proporção observada em dois contracheques (aprox. 19,23% das verbas variáveis), mas em outro mês foi 20%. É possível ajustar as horas ou o valor exato. INSS e IRRF usam parâmetros de 2026.</p></div>
-      </details>
-    </div>
-    <section class="card" aria-label="Previsão de pagamento">
-      <div id="beforeUpload" class="before"><div class="icon">▥</div><strong>Aguardando seu espelho de ponto</strong><p>Selecione um PDF para ver salário bruto, descontos e quanto deve cair após o adiantamento.</p></div>
-      <div id="results" hidden>
-        <div class="result-hero"><div class="result-label" id="payTitle">Pagamento final estimado</div><div id="final" class="big">R$ 0,00</div><div class="caption">Valor a receber após o adiantamento — estimativa, não contracheque oficial.</div>
-          <div class="chips"><div class="chip"><span>Total bruto</span><strong id="gross">—</strong></div><div class="chip"><span>Líquido total do mês</span><strong id="net">—</strong></div></div></div>
-        <div class="section"><div class="card-top"><h2 class="card-title">Como chegamos ao valor</h2></div><table class="table" aria-label="Detalhamento dos rendimentos"><tbody id="earnRows"></tbody></table>
-          <div class="inline-sep"></div><h3>Descontos</h3><table class="table"><tbody id="dedRows"></tbody></table></div>
-        <div class="section"><div class="actions hide-print"><button id="copyBtn" type="button" class="button">Copiar resumo</button><button id="csvBtn" type="button" class="button">Baixar CSV</button><button id="printBtn" type="button" class="button">Imprimir / PDF</button></div>
-        <div id="warningBox" class="warning" role="note" hidden></div>
-        <div class="hint" style="margin-top:12px">Não é possível garantir o valor exato: fórmulas internas de DSR, segundos não exibidos, reajustes, descontos e fechamento do RH podem variar.</div></div>
-      </div>
-    </section>
-  </div>
-  <footer class="foot"><span>FolhaCerta · Leitor local de PDF · Dexian / Yamaha</span><span>Projetado para PDFs textuais deste modelo de espelho de ponto. <b>Não lê imagens escaneadas.</b></span></footer>
-</main>
-<script>
-// FolhaCerta - engine for Dexian point PDFs (text-based reports).
-// All parsing and calculations execute locally in the browser.
-'use strict';
-const FC = (() => {
-  const TWO = n => Math.round((n + Number.EPSILON) * 100) / 100;
-  const hours = s => {
-    if (typeof s !== 'string') return 0;
-    const v = s.trim().match(/^(\d{1,4}):(\d{2})$/);
-    if (!v || +v[2] >= 60) return 0;
-    return +v[1] + +v[2] / 60;
-  };
-  const ptNum = s => {
-    let a = String(s ?? '').replace(/[^\d.,-]/g, '');
-    if (a.includes(',') && a.includes('.')) a = a.replace(/\./g, '').replace(',', '.');
-    else if (a.includes(',')) a = a.replace(',', '.');
-    return Number(a) || 0;
-  };
-  const money = val => new Intl.NumberFormat('pt-BR', {style:'currency',currency:'BRL'}).format(val);
-  const dec = val => new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(val);
-  function bytesLatin1(bytes) {
-    let out='';
-    for(let i=0;i<bytes.length;i+=0x6000) out += String.fromCharCode(...bytes.subarray(i,i+0x6000));
-    return out;
-  }
-  async function inflated(bytes) {
-    if (typeof DecompressionStream === 'undefined') throw Error('Este navegador não permite ler o PDF offline. Use uma versão atualizada do Chrome ou Edge.');
-    try {
-      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
-      const out = await new Response(stream).arrayBuffer();
-      return bytesLatin1(new Uint8Array(out));
-    } catch(e) {throw new Error('Falha na descompressão do PDF: ' + e.message);}
-  }
-  function decodePdfLiteral(s) {
-    return s.replace(/\\(?:([0-7]{1,3})|([nrtbf()\\])|\r?\n)/g, (_,oct,special)=>{
-      if(oct) return String.fromCharCode(parseInt(oct,8)&255);
-      const map={n:'\n',r:'\r',t:'\t',b:'\b',f:'\f'};
-      return special && (map[special]||special) || '';
-    });
-  }
-  // Formed from the text drawing operators. Limits extraction to textual operators,
-  // avoiding accidentally interpreting binary PDF metadata as summary contents.
-  function extractOperators(pageContent) {
-    const pieces=[];
-    for (const block of pageContent.matchAll(/\bBT\b([\s\S]*?)\bET\b/g)) {
-      const atoms=[];
-      for(const m of block[1].matchAll(/\(((?:\\[\s\S]|[^\\)])*)\)\s*(?:Tj|'|")/g)) {
-        atoms.push(decodePdfLiteral(m[1]));
-      }
-      if(atoms.length) pieces.push(atoms.join(' ').replace(/\s+/g,' ').trim());
-    }
-    return pieces;
-  }
-  async function pdfText(arrayBuffer) {
-    const bytes = new Uint8Array(arrayBuffer);
-    const binary=bytesLatin1(bytes);
-    if(!binary.startsWith('%PDF-')) throw Error('Este arquivo não parece ser um PDF.');
-    const objs = Array.from(binary.matchAll(/\b\d+\s+\d+\s+obj\b/g));
-    let contents=[];
-    for(let i=0;i<objs.length;i++){
-      const start=objs[i].index,stop=i+1<objs.length?objs[i+1].index:binary.length;
-      const section=binary.slice(start,Math.min(stop,start+1500));
-      const m=section.match(/\bstream\r?\n/);
-      if(!m) continue;
-      const header=section.slice(0,m.index);
-      if(!/\/Filter\s*\/FlateDecode/.test(header) || /\/Type\s*\/(ObjStm|XRef)/.test(header))continue;
-      const l=header.match(/\/Length\s+(\d+)/);
-      const begin=start+m.index+m[0].length;
-      const end=l?begin+Number(l[1]):binary.indexOf('endstream',begin);
-      if(end<=begin || end>bytes.length || end-begin>25e6)continue;
-      let raw;
-      try {raw=await inflated(bytes.subarray(begin,end));} catch {continue;}
-      if(raw.includes('BT') && (raw.includes(' Tm')||raw.includes(' Td'))) contents.push(raw);
-    }
-    if(!contents.length)throw Error('Não consegui ler o texto deste PDF. Verifique se é o espelho de ponto original (não uma digitalização ou foto).');
-    const items=contents.flatMap(extractOperators);
-    if(items.length<20)throw Error('O arquivo não contém texto reconhecível suficiente para extrair as rubricas.');
-    return items;
-  }
-  function parseItems(items) {
-    const normalized=items.map(s=>s.replace(/\s+/g,' ').trim());
-    const all=normalized.join(' ');
-    const period=all.match(/Espelho de ponto\s*-\s*Per[íi]odo\s*(\d\d\/\d\d\/\d{4})\s*at[ée]\s*(\d\d\/\d\d\/\d{4})/i);
-    if(!period) throw Error('Este PDF não parece ser um espelho de ponto da Dexian compatível: não encontrei o período.');
-    function after(regex, valueRegex, def='') {
-      for(let i=0;i<normalized.length;i++){
-        if(regex.test(normalized[i])) {
-          for (let j=i+1;j<Math.min(i+4,normalized.length);j++) {
-            if(valueRegex.test(normalized[j])) return normalized[j];
-          }
-        }
-      }
-      return def;
-    }
-    const hh=/^\d{1,4}:\d{2}(?:\s*h)?$/;
-    const gets=(r)=>after(r,hh,'').replace(/\s*h$/,'');
-    const selected={
-      night: gets(/^ADIC\.?NOTURNO\s*30%\s*\(A12\)/i),
-      he100: gets(/^HR\.?EXT\.?100%AD\.?NT30%\s*\(A7/i),
-      he75: gets(/^HR\.?EXT\.?75%AD\.?NT30%\s*\(A80\)/i),
-      bank: gets(/^PAGTO\.?\s*B\.?HORAS\s*75%\s*\(B04\)/i),
-    };
-    if(!selected.night)throw Error('Não encontrei o total A12 (adicional noturno). Confira se enviou um espelho de ponto com a seção Verbas.');
-    const dias=after(/^Dias trabalhados$/i,/^\d{1,2}$/,'');
-    const ht=gets(/^HT\s*-\s*Horas trabalhadas$/i);
-    const hn=gets(/^HN\s*-\s*Horas noturnas$/i);
-    const redu=gets(/^Horas noturnas reduzidas$/i);
-    const emitted=after(/^Data Emiss[aã]o:\s*$/i,/\d\d\/\d\d\/\d{4}/,'');
-    const data={periodStart:period[1],periodEnd:period[2],days:dias,worked:ht,nightRaw:hn,nightReduction:redu,emission:emitted, ...selected};
-    const missing=Object.entries(selected).filter(([k,v])=>!v).map(([k])=>({he75:'A80',he100:'A72',bank:'B04'}[k]||k));
-    const startYear=Number(period[1].slice(-4));
-    const endParts=period[2].split('/').map(Number);
-    const dateEnd=new Date(endParts[2],endParts[1]-1,endParts[0],23,59,59);
-    const warnings=[];
-    if(missing.length)warnings.push('Rubricas não encontradas: '+missing.join(', ')+'. Foram consideradas como zero. Confira se realmente não houve essas verbas.');
-    if(data.emission){
-      const d=data.emission.match(/\d\d\/\d\d\/\d{4}/);
-      if(d){const a=d[0].split('/').map(Number);const dt=new Date(a[2],a[1]-1,a[0]);if(dt<dateEnd)warnings.push('O PDF foi emitido antes do término do mês: valores podem estar parciais.');}
-    }
-    if(startYear!==2026)warnings.push('As tabelas automáticas de INSS/IRRF configuradas são de 2026. Atualize para outro ano.');
-    return {...data,missing,warnings};
-  }
-  const INSS2026=[[1621,.075],[2902.84,.09],[4354.27,.12],[8475.55,.14]];
-  function inss2026(base){let sum=0,prev=0;for(const [top,rate] of INSS2026){sum+=Math.max(0,Math.min(base,top)-prev)*rate;prev=top;if(base<=top)break;}return TWO(sum)}
-  function irrf2026(gross,inss){let deduction=Math.max(inss,607.20),base=Math.max(0,gross-deduction),rate=0,minus=0;
-    if(base>4664.68){rate=.275;minus=908.73}else if(base>3751.05){rate=.225;minus=675.49}else if(base>2826.65){rate=.15;minus=394.16}else if(base>2428.80){rate=.075;minus=182.16}
-    let raw=TWO(Math.max(0,base*rate-minus));let reduction=gross<=5000?raw:gross<=7350?Math.min(raw,Math.max(0,978.62-.133145*gross)):0;
-    return TWO(Math.max(0,raw-reduction));
-  }
-  function calculate(point,settings={}){
-    const salary=ptNum(settings.salary||'3000,00'),divisor=ptNum(settings.divisor||'200'),adv=ptNum(settings.advance||'0'),assist=ptNum(settings.assist||'0'),insurance=ptNum(settings.insurance||'0'),other=ptNum(settings.other||'0');
-    if(salary<=0||divisor<=0)throw Error('Preencha um salário e divisor válidos.');
-    const h=salary/divisor,hrs={};
-    for(let name of ['night','he75','he100','bank'])hrs[name]=TWO(hours(point[name]||'00:00'));
-    const earn={salary:TWO(salary),night:TWO(hrs.night*h*.30),he75:TWO(hrs.he75*h*1.975),he100:TWO(hrs.he100*h*2.3),bank:TWO(hrs.bank*h*1.75)};
-    let dsrMode=settings.dsrMode||'automatic';
-    const variablePay=earn.night+earn.he75+earn.he100+earn.bank;
-    let dsrHours=null;
-    if(dsrMode==='automatic') earn.dsr=TWO(variablePay*(5/26));
-    else if(dsrMode==='historical'){dsrHours=13.16;earn.dsr=TWO(dsrHours*h);}
-    else if(dsrMode==='manual'){
-      dsrHours=ptNum(settings.dsrHours);
-      if(dsrHours<0)throw Error('Horas de DSR não podem ser negativas.');
-      earn.dsr=TWO(dsrHours*h);
-    }
-    else if(dsrMode==='value'){
-      if(!String(settings.dsrValue??'').trim())throw Error('Informe o valor de DSR em reais.');
-      earn.dsr=TWO(ptNum(settings.dsrValue));
-      if(earn.dsr<0)throw Error('Valor de DSR não pode ser negativo.');
-    }
-    else throw Error('Modo de DSR não reconhecido.');
-    if(settings.dsrValueOverride!==undefined && String(settings.dsrValueOverride).trim()!=='')earn.dsr=TWO(ptNum(settings.dsrValueOverride));
-    const gross=TWO(Object.values(earn).reduce((a,b)=>a+b,0));
-    const inss=String(settings.inssOverride??'').trim()?TWO(ptNum(settings.inssOverride)):inss2026(gross);
-    const irrf=String(settings.irrfOverride??'').trim()?TWO(ptNum(settings.irrfOverride)):irrf2026(gross,inss);
-    const deductions={inss,irrf,assist,insurance,other,advance:adv};
-    const net=TWO(gross-inss-irrf-assist-insurance-other);
-    const final=TWO(net-adv);
-    return{hrs,earn,dsrHours,dsrMode,gross,net,final,deductions,h};
-  }
-  return {pdfText,parseItems,calculate,money,dec,hours,inss2026,irrf2026,ptNum};
-})();
-if(typeof module!=='undefined' && module.exports)module.exports=FC;
-
-</script>
-<script>
-(()=>{
-  'use strict';
-  const $=id=>document.getElementById(id);let filePoint=null,last=null;
-  const tfields=['night','he75','he100','bank'];
-  const prefs=['salary','divisor','advance','assist','insurance','other','dsrMode','dsrHours','dsrValue','inssOverride','irrfOverride'];
-  const prefsKey='folhacerta-prefs-v3';
-  try {
-    const migrated=!localStorage.getItem(prefsKey);
-    const saved = JSON.parse(localStorage.getItem(prefsKey)||localStorage.getItem('folhacerta-prefs-v2')||'null');
-    if (saved && typeof saved==='object') for (const id of prefs) if (Object.prototype.hasOwnProperty.call(saved,id) && typeof saved[id]==='string') $(id).value=saved[id];
-    // The old version silently applied fixed 13.16 DSR hours: migrate to a moving estimate.
-    if(migrated && $('dsrMode').value==='historical') $('dsrMode').value='automatic';
-  }catch(e){}
-  const setStatus=(message,kind='')=>{const el=$('status');el.hidden=false;el.className='status '+kind;el.textContent=message;};
-  const safe=(x)=>String(x).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  const money=FC.money;
-  const digits=n=>FC.dec(n);
-  async function loadFile(file){
-    if(!file)return;
-    if(!/\.pdf$/i.test(file.name) && file.type!=='application/pdf'){setStatus('Escolha um arquivo PDF.','error');return;}
-    if(file.size>15*1024*1024){setStatus('O PDF é grande demais (máximo 15 MB).','error');return;}
-    filePoint=null;$('results').hidden=true;$('beforeUpload').hidden=false;$('pointSection').hidden=true;
-    setStatus('Lendo o espelho de ponto...');$('filename').hidden=false;$('filename').textContent=file.name;
-    try{
-      const items=await FC.pdfText(await file.arrayBuffer());
-      const point=FC.parseItems(items);
-      filePoint=point;
-      for(const key of tfields)$(key).value=point[key]||'00:00';
-      $('days').textContent=point.days||'—';$('worked').textContent=point.worked||'—';$('reduced').textContent=point.nightReduction||'—';
-      $('period').textContent=`${point.periodStart} até ${point.periodEnd}`;
-      $('pointSection').hidden=false;
-      $('readBadge').textContent=point.warnings.length?'Conferir':'Importado';
-      $('readBadge').className=point.warnings.length?'badge warn':'badge';
-      setStatus('Espelho lido! Os totais foram preenchidos automaticamente.','ok');
-      $('beforeUpload').hidden=true;$('results').hidden=false;
-      recalc();
-    }catch(e){setStatus(e.message||'Não foi possível interpretar este PDF.','error');}
-  }
-  function settings(){return Object.fromEntries(prefs.map(k=>[k,$(k).value]));}
-  function row(label,detail,value,cls=''){
-    return `<tr class="${cls}"><td>${safe(label)}${detail?`<span class="sub">${safe(detail)}</span>`:''}</td><td>${money(value)}</td></tr>`;
-  }
-  function recalc(){
-    if(!filePoint)return;
-    const p={...filePoint};for(const k of tfields){const v=$(k).value.trim();if(v&&!/^\d{1,4}:[0-5]\d$/.test(v)){$('final').textContent='Confira HH:MM';setStatus('Há horas em formato inválido. Use HH:MM, por exemplo 05:34.','error');return;}p[k]=v||'00:00';}
-    try{
-      const v=FC.calculate(p,settings());last={point:p,result:v};
-      $('payTitle').textContent=`${p.warnings.some(x=>x.includes('antes do término'))?'Prévia parcial':'Fechamento'} de ${payMonth(p.periodEnd)} · estimado`;
-      $('final').textContent=money(v.final);$('gross').textContent=money(v.gross);$('net').textContent=money(v.net);
-      $('earnRows').innerHTML=[
-        row('Salário normal',`Divisor: ${settings().divisor} horas`,v.earn.salary),
-        row('A12 · Adicional noturno 30%',`${p.night} no espelho`,v.earn.night),
-        row('A80 · HE 75% + adicional noturno',`${p.he75} no espelho`,v.earn.he75),
-        row('A72 · HE 100% + adicional noturno',`${p.he100} no espelho`,v.earn.he100),
-        row('B04 · Horas convertidas em pagamento',`${p.bank} no espelho · HE 75%`,v.earn.bank),
-        row('DSR sobre horas extras',v.dsrMode==='automatic'?'Estimativa: 19,23% das verbas variáveis':v.dsrMode==='value'?'Valor informado manualmente':`${digits(v.dsrHours)} h · ${v.dsrMode==='historical'?'estimativa fixa':'horas informadas'}`,v.earn.dsr),
-        row('TOTAL BRUTO','',v.gross,'total')].join('');
-      $('dedRows').innerHTML=[
-        row('INSS','Tabela progressiva de 2026 ou valor manual',v.deductions.inss,'deduct'),
-        row('IRRF','Regra de 2026 ou valor manual',v.deductions.irrf,'deduct'),
-        row('Contribuição assistencial','',v.deductions.assist,'deduct'),
-        row('Seguro de vida','',v.deductions.insurance,'deduct'),
-        row('Outros descontos','',v.deductions.other,'deduct'),
-        row('Adiantamento já recebido','Descontado uma única vez',v.deductions.advance,'deduct'),
-        row('A CAIR NO FECHAMENTO','',v.final,'total')].join('');
-      const dsrNote=v.dsrMode==='automatic'?'DSR automático estimado a 19,23% das verbas variáveis (outro contracheque mostrou 20%). O valor oficial não está no espelho de ponto.':v.dsrMode==='historical'?'DSR fixo de 13,16 horas era a regra anterior da calculadora e pode superestimar meses como setembro.':v.dsrMode==='manual'?'DSR calculado com as horas informadas; o RH pode arredondar de maneira diferente.':'DSR em reais informado manualmente conforme contracheque.';
-      const notes=[...p.warnings, dsrNote, 'O espelho exibe minutos, mas a folha pode considerar frações de segundos: pequenas diferenças de centavos podem permanecer.'];
-      $('warningBox').innerHTML=notes.map(x=>`<p>• ${safe(x)}</p>`).join('');$('warningBox').hidden=false;
-    }catch(e){setStatus(e.message,'error');}
-  }
-  function payMonth(end){const a=end.split('/').map(Number);let next=new Date(a[2],a[1],1);return new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(next);}
-  function summary(){if(!last)return'';const {point:p,result:v}=last;
-   return `FOLHACERTA — ESPELHO ${p.periodStart} A ${p.periodEnd}\nA12: ${p.night} | A80: ${p.he75} | A72: ${p.he100} | B04: ${p.bank}\nSalário: ${money(v.earn.salary)}\nAdicional noturno: ${money(v.earn.night)}\nHE75: ${money(v.earn.he75)}\nHE100: ${money(v.earn.he100)}\nHoras convertidas: ${money(v.earn.bank)}\nDSR estimado: ${money(v.earn.dsr)}\nBRUTO: ${money(v.gross)}\nINSS: ${money(v.deductions.inss)}\nIRRF: ${money(v.deductions.irrf)}\nLÍQUIDO TOTAL: ${money(v.net)}\nAdiantamento: ${money(v.deductions.advance)}\nA RECEBER: ${money(v.final)}\nEstimativa não oficial, sujeita a ajustes da folha.`;}
-  $('pickBtn').addEventListener('click',e=>{e.stopPropagation();$('pdfInput').click()});
-  $('dropzone').addEventListener('click',e=>{if(e.target.id!=='pickBtn')$('pdfInput').click()});
-  $('dropzone').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('pdfInput').click()}});
-  $('pdfInput').addEventListener('change',e=>loadFile(e.target.files[0]));
-  for(const name of ['dragenter','dragover'])$('dropzone').addEventListener(name,e=>{e.preventDefault();$('dropzone').classList.add('drag')});
-  for(const name of ['dragleave','drop'])$('dropzone').addEventListener(name,e=>{e.preventDefault();$('dropzone').classList.remove('drag')});
-  $('dropzone').addEventListener('drop',e=>loadFile(e.dataTransfer.files[0]));
-  for(const k of [...prefs,...tfields])$(k).addEventListener('input',()=>{if(prefs.includes(k))try{localStorage.setItem(prefsKey,JSON.stringify(Object.fromEntries(prefs.map(id=>[id,$(id).value]))));}catch(e){};recalc();});
-  function syncDSRControls(){ $('dsrHoursWrap').hidden=$('dsrMode').value!=='manual';$('dsrValueWrap').hidden=$('dsrMode').value!=='value'; }
-  $('dsrMode').addEventListener('change',()=>{syncDSRControls();try{localStorage.setItem(prefsKey,JSON.stringify(Object.fromEntries(prefs.map(id=>[id,$(id).value]))));}catch(e){};recalc();});
-  syncDSRControls();
-  $('printBtn').addEventListener('click',()=>window.print());
-  $('copyBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(summary());setStatus('Resumo copiado.','ok')}catch{const ta=document.createElement('textarea');ta.value=summary();document.body.append(ta);ta.select();document.execCommand('copy');ta.remove();setStatus('Resumo copiado.','ok')}});
-  $('csvBtn').addEventListener('click',()=>{if(!last)return;const {point:p,result:v}=last;const rows=[['Campo','Valor'],['Início',p.periodStart],['Fim',p.periodEnd],['A12 horas',p.night],['A80 horas',p.he75],['A72 horas',p.he100],['B04 horas',p.bank],['Salário',v.earn.salary],['Adicional noturno',v.earn.night],['HE75',v.earn.he75],['HE100',v.earn.he100],['Horas convertidas',v.earn.bank],['DSR estimado',v.earn.dsr],['Total bruto',v.gross],['INSS',v.deductions.inss],['IRRF',v.deductions.irrf],['Contribuição',v.deductions.assist],['Seguro',v.deductions.insurance],['Outros',v.deductions.other],['Líquido mensal',v.net],['Adiantamento',v.deductions.advance],['A receber',v.final]];
-     const content='\ufeff'+rows.map(r=>r.map(c=>'"'+String(typeof c==='number'?FC.dec(c):c).replaceAll('"','""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([content],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=`FolhaCerta_${p.periodEnd.slice(3).replace('/','_')}.csv`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)});
-})();
-</script>
-<script>
-// Instalacao como app apos publicacao em HTTPS. Offline so depois da primeira visita.
-(()=>{
- let pendingInstall;
- const button=document.getElementById('installBtn');
- window.addEventListener('beforeinstallprompt',event=>{
-  event.preventDefault();pendingInstall=event;button.hidden=false;
- });
- button.addEventListener('click',async()=>{
-  if(!pendingInstall)return;
-  await pendingInstall.prompt();pendingInstall=null;button.hidden=true;
- });
- window.addEventListener('appinstalled',()=>{button.hidden=true;pendingInstall=null});
- if('serviceWorker' in navigator && location.protocol==='https:'){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
- }
-})();
-</script>
+<a class="skip" href="#main">Pular para conteúdo</a>
+<aside class="sidebar">
+<a class="brand" href="#overview"><img src="./icon.svg" width="42" height="42" alt=""><span>Folha<span>Certa</span><small>SEU PONTO. SEU SALÁRIO.</small></span></a>
+<div class="nav-label">MEU CONTROLE</div>
+<nav aria-label="Navegação principal"><a href="#overview" data-page="overview"><span aria-hidden="true">◫</span> Visão geral</a><a href="#calculate" data-page="calculate"><span aria-hidden="true">▤</span> Calcular</a><a href="#history" data-page="history"><span aria-hidden="true">◷</span> Histórico</a><a href="#settings" data-page="settings"><span aria-hidden="true">⚙</span> Ajustes</a></nav>
+<div class="sidebar-note"><span class="local-dot"></span><strong>Só no seu dispositivo</strong><p>Seus PDFs são lidos aqui.<br>Sem cadastro e sem upload.</p></div><div class="version">FolhaCerta <span id="appVersion">1.0</span></div>
+</aside>
+<div class="app-shell">
+<header class="topbar"><a class="mobile-brand" href="#overview">Folha<span>Certa</span></a><div class="breadcrumb">Meu controle <span>/</span> <strong id="pageTitle">Visão geral</strong></div><div class="top-actions"><span class="online" id="connection">Local e privado</span><button id="installBtn" class="button compact" type="button">Instalar app</button></div></header>
+<main id="main">
+<div id="globalStatus" class="notice" role="status" hidden></div><div id="updateBanner" class="notice" hidden>Uma atualização está pronta. <button id="updateBtn" class="text-button" type="button">Atualizar agora</button></div>
+<div class="page-heading"><div><div class="eyebrow">CLAREZA PARA O SEU MÊS</div><h1 id="heading">Seu salário, sem surpresa.</h1><p id="headingDescription">Do espelho de ponto à previsão de pagamento.</p></div><label class="month-picker">Horas de referência <input id="month" type="month" aria-label="Competência das horas"></label></div>
+<section id="overview" class="page">
+<div class="dashboard-grid"><article class="balance-card"><div class="balance-top"><span class="pill">PREVISÃO DE PAGAMENTO</span><span class="circle-icon" aria-hidden="true">↗</span></div><p id="paymentLabel" class="payment-label">A receber no fechamento</p><div id="final" class="balance-value">—</div><p id="balanceHint" class="balance-hint">Importe seu ponto e informe o salário para começar.</p><div class="balance-bottom"><div><span>Líquido do mês</span><strong id="net">—</strong></div><div><span>Adiantamento</span><strong id="advanceSummary">—</strong></div></div></article>
+<article class="card start-card"><span class="eyebrow">COMECE PELO SEU PONTO</span><h2>Seu PDF faz<br>o trabalho pesado.</h2><p>Selecione o espelho. Revise as horas e acompanhe o que deve receber.</p><button class="button primary" id="importPointHome" type="button"><span aria-hidden="true">↑</span> Importar espelho de ponto</button><span class="small muted">PDF textual · até 15 MB · leitura local</span></article></div>
+<div class="metrics"><article class="metric"><span>Salário bruto <b aria-hidden="true">↗</b></span><strong id="gross">—</strong><small>Base + adicionais + DSR</small></article><article class="metric"><span>Verbas variáveis <b aria-hidden="true">＋</b></span><strong id="variables">—</strong><small>Noturno e horas extras, sem DSR</small></article><article class="metric"><span>Descontos <b aria-hidden="true">−</b></span><strong id="deductions">—</strong><small>Inclui o adiantamento recebido</small></article></div>
+<div class="two-columns"><article class="card"><div class="card-heading"><div><div class="eyebrow">O CAMINHO DO SEU DINHEIRO</div><h2>Resumo do mês</h2></div><a href="#calculate" class="text-link">Ver cálculo ↗</a></div><div id="breakdown" class="empty compact-empty">Sua previsão aparece aqui assim que informar salário e horas.</div></article><article class="card"><div class="card-heading"><div><div class="eyebrow">MÊS A MÊS</div><h2>Evolução salarial</h2></div><span class="legend"><i></i> A receber</span></div><div id="evolution" class="chart empty">Salve previsões para acompanhar sua evolução.</div><div id="chartLegend" class="small muted"></div></article></div>
+<article class="card compare-card"><div class="card-heading"><div><div class="eyebrow">PREVISÃO × REALIDADE</div><h2>Conferir contracheque</h2></div><button id="importPayslipHome" class="button" type="button">Importar contracheque</button></div><div id="comparison" class="empty compact-empty">Quando o pagamento chegar, importe o recibo para comparar cada rubrica.</div></article>
+</section>
+<section id="calculate" class="page" hidden>
+<article class="card import-card"><div><div class="eyebrow">1 · IMPORTAR</div><h2>Do ponto para as horas.</h2><p>Arraste um PDF para esta área ou escolha no dispositivo.</p></div><div class="import-actions"><button id="importPoint" class="button primary" type="button">Importar ponto</button><button id="manualBtn" class="button" type="button">Lançamento manual</button></div></article><div id="pointMeta" class="notice" hidden></div>
+<div class="two-columns calculation-columns">
+<article class="card"><div class="card-heading"><div><div class="eyebrow">2 · CONFERIR</div><h2>Horas e verbas</h2></div><span id="pointSource" class="pill neutral">Manual</span></div><p class="small muted">Aceita HH:MM ou decimal. Ex.: <b>05:30 = 5,50 horas</b>. O A12 do espelho já inclui a redução noturna.</p><div class="form-grid">
+<label>A12 · adicional noturno<input id="night" inputmode="decimal" value="00:00" data-point="night" autocomplete="off"><small>Adicional de 30%</small></label><label>A80 · HE 75% + noturno<input id="he75" inputmode="decimal" value="00:00" data-point="he75" autocomplete="off"><small>Horas da rubrica A80</small></label><label>A72 · HE 100% + noturno<input id="he100" inputmode="decimal" value="00:00" data-point="he100" autocomplete="off"><small>Horas da rubrica A72</small></label><label>B04 · horas convertidas<input id="bank" inputmode="decimal" value="00:00" data-point="bank" autocomplete="off"><small>Pagamento, sem saldo para folga</small></label>
+<label class="full">Base das horas de A12<select id="nightBasis" data-setting="nightBasis"><option value="reduced">Já reduzidas — total do espelho (A12)</option><option value="clock">Horas de relógio — aplicar redução de 52min30s</option></select></label></div>
+<details><summary>Domingos e feriados · crédito de 40%</summary><p class="small muted">Informe somente horas de relógio que ainda não estejam incluídas no total B04. O crédito será multiplicado por 1,40 e convertido em pagamento pelo fator B04. Não alteramos as horas já importadas.</p><label>Horas adicionais ainda fora do B04<input id="sundayRaw" data-point="sundayRaw" value="00:00" inputmode="decimal"></label><p id="sundayCredit" class="small accent"></p></details><label class="block-label">Observações deste mês<textarea id="notes" rows="2" placeholder="Ajustes, fechamento parcial ou observações para conferir depois."></textarea></label></article>
+<article class="card"><div class="card-heading"><div><div class="eyebrow">3 · ENTENDER</div><h2>Cálculo detalhado</h2></div><a class="text-link" href="#settings">Ajustar regras ↗</a></div><div id="calculationError" class="notice warning" hidden></div><div id="calculationDetails" class="empty compact-empty">Informe o salário-base em Ajustes ou importe um contracheque.</div><div id="calculationWarnings" class="small muted"></div><div class="actions"><button class="button primary" id="saveForecast" type="button">Salvar previsão</button><button class="button" id="csvBtn" type="button">Exportar CSV</button><button class="button" id="copyBtn" type="button">Copiar resumo</button></div><p id="savedInfo" class="small muted"></p></article></div>
+</section>
+<section id="history" class="page" hidden><article class="card"><div class="card-heading"><div><div class="eyebrow">SEU HISTÓRICO</div><h2>Cada mês, suas regras.</h2></div><button id="newMonthBtn" class="button" type="button">＋ Novo mês</button></div><p class="small muted">As horas e o pagamento têm competências separadas. Cada mês preserva seu divisor e seus descontos.</p><div id="historyList" class="empty">Você ainda não salvou uma previsão.</div></article><article class="card backup-card"><div><h2>Leve seu histórico com você.</h2><p>O backup JSON permite transferir os dados para outro navegador ou celular. Guarde-o em um lugar privado.</p></div><div class="actions"><button class="button" id="backupBtn" type="button">Exportar backup</button><button class="button" id="restoreBtn" type="button">Restaurar backup</button></div></article></section>
+<section id="settings" class="page" hidden>
+<div class="notice info">Estes ajustes pertencem à competência selecionada. O divisor fica registrado mês a mês. Você também pode importar um contracheque para preencher salário e descontos reconhecidos.</div>
+<div class="two-columns">
+<article class="card"><div class="card-heading"><div><div class="eyebrow">CONTRATO E FECHAMENTO</div><h2>Base do cálculo</h2></div></div><div class="form-grid"><label>Salário-base (R$)<input id="salary" data-setting="salary" placeholder="Informe seu salário" inputmode="decimal" autocomplete="off"></label><label>Divisor mensal (horas)<input id="divisor" data-setting="divisor" inputmode="decimal"><small>Ex.: 200 ou 220, conforme a folha</small></label><label class="full">Competência do pagamento<input id="payMonth" type="month"><small>Em geral, o mês seguinte às horas variáveis.</small></label><label>Adicional noturno (%)<input id="nightPercent" data-setting="nightPercent" inputmode="decimal"></label><label>Outros proventos tributáveis (R$)<input id="extraEarnings" data-setting="extraEarnings" inputmode="decimal"></label></div><details><summary>Fatores das rubricas de horas extras</summary><p class="small muted">Preservamos os fatores do motor anterior, compatíveis com a amostra conferida. São parâmetros ajustáveis, não uma confirmação da convenção coletiva. O fator multiplica as horas pelo valor da hora-base.</p><div class="form-grid"><label>A80 · HE 75% + noturno<input id="he75Factor" data-setting="he75Factor" inputmode="decimal"></label><label>A72 · HE 100% + noturno<input id="he100Factor" data-setting="he100Factor" inputmode="decimal"></label><label>B04 · HE 75%<input id="bankFactor" data-setting="bankFactor" inputmode="decimal"></label></div></details></article>
+<article class="card"><div class="card-heading"><div><div class="eyebrow">REPOUSO SEMANAL</div><h2>Como estimar o DSR</h2></div><span class="pill amber">A conferir</span></div><label>Método<select id="dsrMode" data-setting="dsrMode"><option value="ratio">Proporção de referência · estimativa</option><option value="calendar">Dias úteis e repousos · simulação</option><option value="hours">Informar horas de DSR</option><option value="value">Informar DSR em reais</option></select></label><div class="form-grid dsr-controls"><label id="ratioWrap">Proporção das variáveis (%)<input id="dsrRate" data-setting="dsrRate" inputmode="decimal"></label><label id="usefulWrap" hidden>Dias úteis<input id="usefulDays" data-setting="usefulDays" inputmode="numeric"></label><label id="restWrap" hidden>Dias de repouso<input id="restDays" data-setting="restDays" inputmode="numeric"></label><label id="dsrHoursWrap" hidden>Horas DSR (HH:MM ou decimal)<input id="dsrHours" data-setting="dsrHours" inputmode="decimal"></label><label id="dsrValueWrap" hidden>DSR (R$)<input id="dsrValue" data-setting="dsrValue" inputmode="decimal"></label></div><p class="small muted">A proporção inicial de 5/26 (~19,23%) é uma referência histórica do aplicativo. O ponto não informa o DSR oficial. Os dias úteis e repousos da simulação devem ser conferidos com o RH.</p></article>
+<article class="card"><div class="card-heading"><div><div class="eyebrow">VALORES DO MÊS</div><h2>Adiantamento e descontos</h2></div></div><div class="form-grid"><label>Adiantamento já recebido (R$)<input id="advance" data-setting="advance" inputmode="decimal"></label><label>Contribuição assistencial (R$)<input id="assist" data-setting="assist" inputmode="decimal"></label><label>Seguro de vida (R$)<input id="insurance" data-setting="insurance" inputmode="decimal"></label><label>Outros descontos (R$)<input id="other" data-setting="other" inputmode="decimal"></label></div><p class="small muted">O adiantamento é subtraído uma única vez para chegar ao pagamento final.</p></article>
+<article class="card"><div class="card-heading"><div><div class="eyebrow">TRIBUTOS</div><h2>INSS e IRRF</h2></div><span class="pill neutral">Tabela 2026</span></div><div class="form-grid"><label class="full">Arredondamento INSS<select id="inssRounding" data-setting="inssRounding"><option value="truncate-brackets">Truncar cada faixa · eSocial</option><option value="round-total">Arredondar somente o total</option></select></label><label>Dependentes para IRRF<input id="dependents" data-setting="dependents" inputmode="numeric"></label><label>Pensão dedutível (R$)<input id="pension" data-setting="pension" inputmode="decimal"></label><label>INSS manual (opcional)<input id="inssOverride" data-setting="inssOverride" placeholder="Automático" inputmode="decimal"></label><label>IRRF manual (opcional)<input id="irrfOverride" data-setting="irrfOverride" placeholder="Automático" inputmode="decimal"></label></div><p class="small muted">IRRF considera a dedução mais vantajosa e a redução de 2026. Para outro ano, informe os tributos manualmente até a atualização das tabelas.</p><details><summary>Fontes e privacidade</summary><p class="small muted"><a href="https://www.gov.br/inss/pt-br/direitos-e-deveres/inscricao-e-contribuicao/tabela-de-contribuicao-mensal" target="_blank" rel="noopener">Tabela INSS 2026</a> · <a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda/tabelas/2026" target="_blank" rel="noopener">Receita Federal: IRRF 2026</a></p><p class="small muted">Não armazenamos o PDF, CPF, conta bancária ou nome do empregado. Somente horas, valores, competências e observações ficam no armazenamento deste navegador. Limpar os dados do navegador pode apagar o histórico; exporte backups.</p><p class="small muted">O site e o APK usam armazenamentos separados. Para transferir, exporte e restaure o backup.</p></details></article>
+</div>
+<article class="card"><div class="card-heading"><div><h2>Valores reais</h2><p class="small muted">Importe o recibo ou registre o pagamento manualmente para comparar com sua previsão.</p></div><button id="importPayslipSettings" class="button" type="button">Importar contracheque</button></div><form id="actualForm"><div class="form-grid actual-grid"><label>Bruto real (R$)<input id="actualGross" inputmode="decimal" required></label><label>Líquido total do mês (R$)<input id="actualNet" inputmode="decimal" required></label><label>Pagamento final real (R$)<input id="actualFinal" inputmode="decimal" required></label><button class="button" type="submit">Salvar valores reais</button></div></form></article>
+</section>
+<footer>Estimativa para conferência pessoal. O contracheque e as regras confirmadas pelo RH são a referência oficial.<span id="autosaveStatus">Dados apenas neste dispositivo.</span></footer>
+</main></div>
+<nav class="bottom-nav" aria-label="Navegação no celular"><a href="#overview" data-page="overview"><span aria-hidden="true">◫</span>Visão geral</a><a href="#calculate" data-page="calculate"><span aria-hidden="true">▤</span>Calcular</a><a href="#history" data-page="history"><span aria-hidden="true">◷</span>Histórico</a><a href="#settings" data-page="settings"><span aria-hidden="true">⚙</span>Ajustes</a></nav>
+<input id="pdfInput" type="file" accept="application/pdf,.pdf" hidden><input id="backupInput" type="file" accept="application/json,.json" hidden>
+<dialog id="installDialog"><h2>FolhaCerta no seu Android</h2><p>Abra o site no Chrome. Toque no menu ⋮ e escolha <b>Instalar aplicativo</b> ou <b>Adicionar à tela inicial</b>.</p><p class="small muted">Depois da primeira visita e do preparo offline, você pode usar o app sem conexão. Seus registros continuam neste navegador.</p><button class="button primary" id="closeInstall" type="button">Entendi</button></dialog>
+<dialog id="restoreDialog"><h2>Restaurar backup?</h2><p id="restoreDescription"></p><p class="small muted">Meses com a mesma competência serão substituídos pelos dados do backup. Exporte seu histórico atual antes, se necessário.</p><div class="actions"><button class="button primary" id="confirmRestore" type="button">Restaurar</button><button class="button" id="cancelRestore" type="button">Cancelar</button></div></dialog>
+<dialog id="payslipDialog"><h2>Confirmar contracheque</h2><p id="payslipDescription"></p><label>Relacionar às horas de<input id="payslipWorkMonth" type="month"></label><div class="actions"><button class="button primary" id="confirmPayslip" type="button">Vincular contracheque</button><button class="button" id="cancelPayslip" type="button">Cancelar</button></div></dialog>
+<noscript>Ative o JavaScript para usar o cálculo e a leitura local de PDFs.</noscript>
 </body></html>
