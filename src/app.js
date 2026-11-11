@@ -1,6 +1,6 @@
 import { calculate, DEFAULTS, decimal, money, monthLabel, nextMonth, number, round, validMonth } from './payroll.js';
 import { parsePoint, parsePayslip, readPdf } from './pdf.js';
-import { blankRecord, migratePreferences, readLedger, validateLedger, writeLedger } from './storage.js';
+import { blankRecord, migratePreferences, planRestore, readLedger, validateLedger, writeLedger } from './storage.js';
 
 const $ = id => document.getElementById(id);
 const escape = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -175,14 +175,24 @@ function download(content,type,name) {
 }
 $('backupBtn').addEventListener('click',()=>download(JSON.stringify(ledger,null,2),'application/json',`FolhaCerta_backup_${new Date().toISOString().slice(0,10)}.json`));
 $('restoreBtn').addEventListener('click',()=>{$('backupInput').value='';$('backupInput').click();});
+function previewRestore() {
+  try {
+    const plan=planRestore(ledger,pendingRestore,$('restoreMode').value);
+    const describe=months=>months.map(monthLabel).join(', ');
+    $('restoreDescription').textContent=[`${plan.added.length} meses novos, ${plan.replaced.length} substituídos e ${plan.kept.length} mantidos.`,plan.added.length?`Adicionar: ${describe(plan.added)}.`:'',plan.replaced.length?`Substituir: ${describe(plan.replaced)}.`:'',plan.kept.length?`Manter: ${describe(plan.kept)}.`:''].filter(Boolean).join(' ');
+    $('confirmRestore').disabled=!(plan.added.length+plan.replaced.length);
+  } catch(err) { $('restoreDescription').textContent=err.message; $('confirmRestore').disabled=true; }
+}
+$('restoreMode').addEventListener('change',previewRestore);
 $('backupInput').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{
   if(file.size>5*1024*1024)throw Error('Backup acima do limite de 5 MB.');
   pendingRestore=validateLedger(JSON.parse(await file.text()));
   const months=Object.keys(pendingRestore.records);if(!months.length)throw Error('O backup não contém competências.');
-  const overlaps=months.filter(m=>ledger.records[m]);$('restoreDescription').textContent=`Serão restauradas ${months.length} competências. ${overlaps.length} competências já existentes serão substituídas.`;$('restoreDialog').showModal();
+  $('restoreMode').value='keep';previewRestore();$('restoreDialog').showModal();
 }catch(err){pendingRestore=null;status(err.message,'error');}});
-$('confirmRestore').addEventListener('click',()=>{if(!pendingRestore)return;ledger.records={...ledger.records,...pendingRestore.records};pendingRestore=null;protectedStorage=false;$('restoreDialog').close();loadMonth(Object.keys(ledger.records).sort().at(-1));const saved=persist();status(saved?'Backup restaurado neste dispositivo.':'Backup aberto nesta sessão; o navegador não permitiu salvar.',saved?'':'error');});
+$('confirmRestore').addEventListener('click',()=>{if(!pendingRestore)return;try{const plan=planRestore(ledger,pendingRestore,$('restoreMode').value);if(!plan.added.length&&!plan.replaced.length)return;ledger=plan.ledger;pendingRestore=null;protectedStorage=false;$('restoreDialog').close();loadMonth([...plan.added,...plan.replaced].sort().at(-1));const saved=persist();status(saved?`Backup restaurado: ${plan.added.length} meses adicionados e ${plan.replaced.length} substituídos.`:'Backup aberto nesta sessão; o navegador não permitiu salvar.',saved?'':'error');}catch(err){status(err.message,'error');}});
 $('cancelRestore').addEventListener('click',()=>{pendingRestore=null;$('restoreDialog').close();});
+$('restoreDialog').addEventListener('cancel',()=>{pendingRestore=null;});
 function summary() { if(!last)return '';return `FOLHACERTA — HORAS ${monthLabel(currentMonth)}\nPagamento: ${monthLabel(record.payMonth)}\nDivisor: ${record.settings.divisor}\n${Object.entries(last.earn).map(([k,n])=>earningLabels[k]+': '+money(n)).join('\n')}\nBRUTO: ${money(last.gross)}\n${Object.entries(last.deductions).map(([k,n])=>deductionLabels[k]+': '+money(n)).join('\n')}\nLÍQUIDO MENSAL: ${money(last.net)}\nPAGAMENTO FINAL: ${money(last.final)}\nDSR: ${last.dsrDescription}. Estimativa não oficial.`; }
 $('copyBtn').addEventListener('click',async()=>{if(!last)return;try{await navigator.clipboard.writeText(summary());status('Resumo copiado.');}catch{const text=document.createElement('textarea');text.value=summary();document.body.append(text);text.select();const ok=document.execCommand('copy');text.remove();status(ok?'Resumo copiado.':'Não foi possível copiar neste navegador.',ok?'':'warning');}});
 $('csvBtn').addEventListener('click',()=>{if(!last)return;const rows=[['Campo','Valor'],['Horas de referência',currentMonth],['Competência pagamento',record.payMonth],['Divisor',record.settings.divisor],...Object.entries(last.earn).map(([k,v])=>[earningLabels[k],decimal(v)]),['Bruto',decimal(last.gross)],...Object.entries(last.deductions).map(([k,v])=>[deductionLabels[k],decimal(v)]),['Líquido mensal',decimal(last.net)],['Pagamento final',decimal(last.final)],['DSR',last.dsrDescription]];const quote=v=>'"'+String(v).replaceAll('"','""')+'"';download('\ufeff'+rows.map(r=>r.map(quote).join(';')).join('\r\n'),'text/csv',`FolhaCerta_${currentMonth}.csv`);});
