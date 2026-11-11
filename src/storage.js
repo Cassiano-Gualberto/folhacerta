@@ -15,6 +15,7 @@ export function validateLedger(value) {
   for (const [month, r] of Object.entries(value.records)) {
     if (!validMonth(month) || !r || typeof r !== 'object' || !validMonth(r.payMonth)) throw Error('Competência inválida no backup.');
     const rec = blankRecord(month);
+    rec.payMonth = r.payMonth;
     if (!r.settings || !r.point) throw Error('Backup incompleto.');
     for (const k of Object.keys(DEFAULTS)) if (typeof r.settings[k] === 'string' && r.settings[k].length < 100) rec.settings[k] = r.settings[k];
     for (const k of ['night','he75','he100','bank','sundayRaw','periodStart','periodEnd','days','worked','nightRaw','nightReduction','source']) if (typeof r.point[k] === 'string' && r.point[k].length < 100) rec.point[k] = r.point[k];
@@ -36,6 +37,19 @@ export function validateLedger(value) {
     records[month] = rec;
   }
   return { version:1, records };
+}
+export function planRestore(ledger, backup, mode = 'keep') {
+  if (!['keep','replace'].includes(mode)) throw Error('Selecione como tratar os meses existentes.');
+  const incoming = validateLedger(backup).records;
+  const months = Object.keys(incoming).sort();
+  if (!months.length) throw Error('O backup não contém competências.');
+  const conflicts = months.filter(month => Object.hasOwn(ledger.records, month));
+  const added = months.filter(month => !Object.hasOwn(ledger.records, month));
+  const replaced = mode === 'replace' ? conflicts : [];
+  const records = { ...ledger.records };
+  for (const month of [...added, ...replaced]) records[month] = incoming[month];
+  if (Object.keys(records).length > 600) throw Error('O histórico combinado ultrapassa o limite de 600 competências.');
+  return { ledger: { version:1, records }, added, replaced, kept: mode === 'keep' ? conflicts : [] };
 }
 export function writeLedger(storage, ledger) { try { storage.setItem(KEY, JSON.stringify(ledger)); } catch { throw Error('Não foi possível salvar neste navegador. Exporte um backup antes de fechar.'); } }
 export function migratePreferences(storage, record) {

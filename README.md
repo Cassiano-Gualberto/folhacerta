@@ -10,6 +10,8 @@ Continuação do PWA original: leitura **local** de espelhos de ponto e contrach
 4. Importe o contracheque do pagamento e confirme a qual competência das horas ele pertence. Valores reais não substituem a previsão fixada.
 5. Exporte backups JSON antes de trocar de navegador, reinstalar o APK ou limpar dados.
 
+Ao restaurar um backup, confira a prévia dos meses afetados. Por padrão, meses já existentes são mantidos e apenas os novos são adicionados. Escolha **Substituir pelos dados do backup** para recuperar também os meses repetidos; meses ausentes no backup continuam no dispositivo. A competência de pagamento, as previsões fixadas e os valores reais são preservados na restauração.
+
 O salário não é pré-preenchido no código público para preservar a privacidade. Não há demonstrações com dados pessoais. Se a primeira previsão só for calculada depois da importação do contracheque, a interface informa que se trata de cálculo com dados já conhecidos, não de previsão anterior ao pagamento.
 
 ## Regras e limites
